@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 
-class CustomTextFormField extends StatefulWidget {
-  final String labelText;
-  // final String hintText;
-  final bool obscureText;
+class CustomTextField extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextInputType keyboardType;
@@ -13,13 +10,11 @@ class CustomTextFormField extends StatefulWidget {
   final bool showSuffixIconOnFocusOnly;
   final EdgeInsetsGeometry suffixIconPadding;
   final BoxConstraints? suffixIconConstraints;
-  final String? placeholder;
+  final String? hintText;
+  // final String? labelText;
 
-  const CustomTextFormField({
+  const CustomTextField({
     super.key,
-    required this.labelText,
-    // required this.hintText,
-    this.obscureText = false,
     this.controller,
     this.focusNode,
     this.keyboardType = TextInputType.text,
@@ -28,14 +23,14 @@ class CustomTextFormField extends StatefulWidget {
     this.showSuffixIconOnFocusOnly = false,
     this.suffixIconPadding = const EdgeInsets.only(right: 16),
     this.suffixIconConstraints,
-    this.placeholder,
+    this.hintText,
   });
 
   @override
-  State<CustomTextFormField> createState() => _CustomTextFormFieldState();
+  State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFormFieldState extends State<CustomTextFormField> {
+class _CustomTextFieldState extends State<CustomTextField> {
   late final FocusNode _focusNode;
   late final bool _ownsFocusNode;
 
@@ -67,25 +62,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     final shouldShowSuffixIcon =
         !widget.showSuffixIconOnFocusOnly || _focusNode.hasFocus;
 
-    return TextFormField(
+    return TextField(
       focusNode: _focusNode,
       controller: widget.controller,
-      obscureText: widget.obscureText,
       keyboardType: widget.keyboardType,
-      // initialValue: widget.controller == null ? widget.placeholder : null,
-      // onChanged: (value) {
-      //   setState(() {
-      //     hintText = value.isEmpty ? widget.placeholder : null;
-      //   });
-      // },
       decoration: InputDecoration(
-        labelText: widget.labelText,
-        hintText: widget.placeholder,
-        // text: widget.placeholder,
-        labelStyle: const TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 16,
-        ),
+        hintText: widget.hintText,
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(

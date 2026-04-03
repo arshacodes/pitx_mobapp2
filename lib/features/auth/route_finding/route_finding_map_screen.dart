@@ -5,8 +5,24 @@ import 'package:pitx_mobapp2/shared/widgets/custom_button.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_location_list_item.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_secondary_button.dart';
 
+enum RouteMapField { origin, destination }
+
+extension RouteMapFieldX on RouteMapField {
+  String get label => this == RouteMapField.origin ? 'origin' : 'destination';
+
+  String get buttonLabel =>
+      this == RouteMapField.origin ? 'Origin' : 'Destination';
+}
+
 class RouteFindingMapScreen extends StatefulWidget {
-  const RouteFindingMapScreen({super.key});
+  final RouteMapField field;
+  final String? initialLocationName;
+
+  const RouteFindingMapScreen({
+    super.key,
+    this.field = RouteMapField.origin,
+    this.initialLocationName,
+  });
 
   @override
   State<RouteFindingMapScreen> createState() => _RouteFindingMapScreenState();
@@ -14,6 +30,21 @@ class RouteFindingMapScreen extends StatefulWidget {
 
 class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
   bool _isCenteredOnCurrentLocation = false;
+  late String _selectedLocationName;
+  late String _selectedLocationAddress;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLocationName = widget.initialLocationName?.trim().isNotEmpty == true
+        ? widget.initialLocationName!.trim()
+        : (widget.field == RouteMapField.origin
+              ? 'PITX'
+              : 'SM Mall of Asia');
+    _selectedLocationAddress = widget.field == RouteMapField.origin
+        ? 'Paranaque Integrated Terminal Exchange'
+        : 'Seaside Blvd, Pasay';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +96,9 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
                         onPressed: () {
                           setState(() {
                             _isCenteredOnCurrentLocation = true;
+                            _selectedLocationName = 'Current location';
+                            _selectedLocationAddress =
+                                'Use your current position as ${widget.field.label}';
                           });
                         },
                         width: 58,
@@ -82,7 +116,8 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
             ),
           ),
           // const SizedBox(height: 16),
-          Padding(
+          Container(
+            color: AppColors.background,
             padding: const EdgeInsets.all(24),
             child: Column(
               // crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +125,7 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
               children: [
                 // const SizedBox(height: 16),
                 Text(
-                  'Set your origin location',
+                  'Set your ${widget.field.label} location',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -101,7 +136,7 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
                   ),
                 ),
                 Text(
-                  'Slide map to adjust pin',
+                  'Slide map to center the pin',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -111,14 +146,16 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(height: 12),
                 CustomLocationListItem(
                   color: Colors.white,
-                  locationName: 'SM Mall of Asia',
-                  locationAddress: 'Seaside Blvd, Pasay',
-                  borderColor: AppColors.textSecondary,
+                  locationName: _selectedLocationName,
+                  locationAddress: _selectedLocationAddress,
+                  borderColor: AppColors.pitx_blue.withOpacity(0.20),
                   onTap: () {
-                    // TODO: open saved route history item
+                    setState(() {
+                      _isCenteredOnCurrentLocation = false;
+                    });
                   },
                 ),
                 const SizedBox(height: 24),
@@ -126,9 +163,9 @@ class _RouteFindingMapScreenState extends State<RouteFindingMapScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     CustomButton(
-                      label: 'Confirm Origin',
+                      label: 'Confirm ${widget.field.buttonLabel}',
                       onPressed: () {
-                        // Implement login logic here
+                        Navigator.pop(context, _selectedLocationName);
                       },
                       backgroundColor: AppTheme.lightTheme.primaryColor,
                       textColor: Colors.white,

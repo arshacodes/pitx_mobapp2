@@ -18,14 +18,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+  // void dispose() {
+  //   _emailController.dispose();
+  //   _passwordController.dispose();
+  //   super.dispose();
+  // }
 
   void _submit() {
-    Navigator.pushNamedAndRemoveUntil(context, '/main', (_) => false);
+    // Navigator.pushNamedAndRemoveUntil(context, '/main', (_) => false);
   }
 
   void _showPasswordHelp() {
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
           child: Column(
             children: [
               const SizedBox(height: 48),
@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColors.pitx_blue.withOpacity(0.30),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  // const SizedBox(height: 12),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -105,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 backgroundColor: AppTheme.lightTheme.primaryColor,
                 textColor: Colors.white,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

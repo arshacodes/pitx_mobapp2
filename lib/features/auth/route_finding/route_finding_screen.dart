@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 import 'package:pitx_mobapp2/core/theme/app_theme.dart';
+import 'package:pitx_mobapp2/features/auth/route_finding/route_finding_map_screen.dart';
 
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_location_list_item.dart';
@@ -118,8 +119,34 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
     );
   }
 
-  void _openMap() {
-    Navigator.pushNamed(context, '/route-finding-map');
+  Future<void> _openMap(RouteMapField field) async {
+    FocusScope.of(context).unfocus();
+
+    final initialLocationName = field == RouteMapField.origin
+        ? _originController.text.trim()
+        : _destinationController.text.trim();
+
+    final selectedLocation = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => RouteFindingMapScreen(
+          field: field,
+          initialLocationName: initialLocationName,
+        ),
+      ),
+    );
+
+    if (!mounted || selectedLocation == null || selectedLocation.trim().isEmpty) {
+      return;
+    }
+
+    setState(() {
+      if (field == RouteMapField.origin) {
+        _originController.text = selectedLocation;
+      } else {
+        _destinationController.text = selectedLocation;
+      }
+      _message = null;
+    });
   }
 
   @override
@@ -130,7 +157,7 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
         child: Column(
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Column(
@@ -143,6 +170,24 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
                           Icons.trip_origin_rounded,
                           color: AppColors.primary,
                         ),
+                        suffixIcon: IconButton(
+                          onPressed: () => _openMap(RouteMapField.origin),
+                          icon: Icon(
+                            Icons.map_rounded,
+                            color: AppColors.pitx_blue.withOpacity(0.45),
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                          splashRadius: 20,
+                          tooltip: 'Pick origin on map',
+                        ),
+                        showSuffixIconOnFocusOnly: true,
+                        suffixIconPadding: const EdgeInsets.only(right: 8),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       CustomTextFormField(
@@ -153,23 +198,47 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
                           Icons.location_on_rounded,
                           color: AppColors.pitx_red,
                         ),
+                        suffixIcon: IconButton(
+                          onPressed: () => _openMap(RouteMapField.destination),
+                          icon: Icon(
+                            Icons.map_rounded,
+                            color: AppColors.pitx_blue.withOpacity(0.45),
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                          splashRadius: 20,
+                          tooltip: 'Pick destination on map',
+                        ),
+                        showSuffixIconOnFocusOnly: true,
+                        suffixIconPadding: const EdgeInsets.only(right: 8),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
-                IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    overlayColor: AppColors.pitx_blue.withOpacity(0.10),
-                    padding: const EdgeInsets.all(14),
-                  ),
-                  icon: const Icon(
-                    Icons.swap_vert_rounded,
-                    color: AppColors.pitx_blue,
-                    size: 28,
-                  ),
-                  onPressed: _swapLocations,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        overlayColor: AppColors.pitx_blue.withOpacity(0.10),
+                        padding: const EdgeInsets.all(12),
+                      ),
+                      icon: const Icon(
+                        Icons.swap_vert_rounded,
+                        color: AppColors.pitx_blue,
+                        size: 28,
+                      ),
+                      onPressed: _swapLocations,
+                    ),  
+                  ],
                 ),
               ],
             ),
@@ -188,7 +257,11 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
                   child: CustomSecondaryButton(
                     label: 'Open Map',
                     prefixIcon: Icons.map_rounded,
-                    onPressed: _openMap,
+                    onPressed: () => _openMap(
+                      _destinationFocusNode.hasFocus
+                          ? RouteMapField.destination
+                          : RouteMapField.origin,
+                    ),
                   ),
                 ),
               ],
@@ -200,7 +273,7 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.pitx_blue.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
                   _message!,

@@ -22,7 +22,7 @@ class AppBottomNav extends StatelessWidget {
             Expanded(
               child: _NavItem(
                 icon: Icons.home_rounded,
-                label: 'Home',
+                // label: 'Home',
                 isSelected: currentIndex == 0,
                 // showLeftDivider: false,
                 onTap: () => onTap(0),
@@ -31,7 +31,7 @@ class AppBottomNav extends StatelessWidget {
             Expanded(
               child: _NavItem(
                 icon: Icons.route_rounded,
-                label: 'Routes',
+                // label: 'Routes',
                 isSelected: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -39,7 +39,7 @@ class AppBottomNav extends StatelessWidget {
             Expanded(
               child: _NavItem(
                 icon: Icons.menu_rounded,
-                label: 'More',
+                // label: 'More',
                 isSelected: currentIndex == 2,
                 onTap: () => onTap(2),
               ),
@@ -53,14 +53,14 @@ class AppBottomNav extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
-  final String label;
+  // final String label;
   final bool isSelected;
   // final bool showLeftDivider;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
-    required this.label,
+    // required this.label,
     required this.isSelected,
     required this.onTap,
     // this.showLeftDivider = true,
@@ -102,15 +102,15 @@ class _NavItem extends StatelessWidget {
               size: 32,
               color: isSelected ? activeColor : inactiveColor,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? activeColor : inactiveColor,
-              ),
-            ),
+            // const SizedBox(height: 4),
+            // Text(
+            //   label,
+            //   style: TextStyle(
+            //     fontSize: 10,
+            //     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            //     color: isSelected ? activeColor : inactiveColor,
+            //   ),
+            // ),
           ],
         ),
       ),

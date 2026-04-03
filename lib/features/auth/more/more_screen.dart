@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+
+import 'package:pitx_mobapp2/features/auth/more/profile_screen.dart';
+import 'package:pitx_mobapp2/features/auth/more/support_screen.dart';
+import 'package:pitx_mobapp2/features/auth/more/report_screen.dart';
+
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 import 'package:pitx_mobapp2/core/theme/app_theme.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_button.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_list_item.dart';
 import 'package:pitx_mobapp2/shared/widgets/gradient_bubble.dart';
+
+import 'package:pitx_mobapp2/shared/widgets/custom_profile_header.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -29,8 +36,8 @@ class MoreScreen extends StatelessWidget {
           color: AppTheme.lightTheme.scaffoldBackgroundColor,
         ),
         Positioned(
-          top: -250,
-          right: -200,
+          bottom: 0,
+          right: -300,
           child: GradientBubble(
             size: 500,
             colors: [
@@ -62,8 +69,8 @@ class MoreScreen extends StatelessWidget {
                   child: IntrinsicHeight(
                     child: Column(
                       children: [
-                        const Spacer(),
-                        const _ProfileHeader(
+                        // const Spacer(),
+                        const ProfileHeader(
                           displayName: 'Commuter Account',
                           email: 'Manage your travel tools and preferences',
                           initials: 'CA',
@@ -73,12 +80,18 @@ class MoreScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CustomListItem(
-                              icon: Icons.badge_rounded,
+                              icon: Icons.person_rounded,
                               title: 'Profile',
                               subtitle: 'View your commuter details',
-                              onTap: () => _showPlaceholder(
+                              // onTap: () => _showPlaceholder(
+                              //   context,
+                              //   'Profile tools coming soon.',
+                              // ),
+                              onTap: () => Navigator.push(
                                 context,
-                                'Profile tools coming soon.',
+                                MaterialPageRoute(
+                                  builder: (_) => const ProfileScreen(),
+                                ),
                               ),
                             ),
                             Divider(
@@ -86,8 +99,8 @@ class MoreScreen extends StatelessWidget {
                               color: AppColors.pitx_blue.withOpacity(0.10),
                             ),
                             CustomListItem(
-                              icon: Icons.bookmark_rounded,
-                              title: 'Saved Routes',
+                              icon: Icons.star_rounded,
+                              title: 'Favorite Routes',
                               subtitle: 'Keep frequent trips close by',
                               onTap: () => _showPlaceholder(
                                 context,
@@ -100,12 +113,34 @@ class MoreScreen extends StatelessWidget {
                             ),
                             CustomListItem(
                               icon: Icons.contact_support_rounded,
-                              title: 'Help & Support',
+                              title: 'Support Center',
                               subtitle:
                                   'Get commuter assistance and terminal info',
-                              onTap: () => _showPlaceholder(
+                              // onTap: () => _showPlaceholder(
+                              //   context,
+                              //   'Support tools coming soon.',
+                              // ),
+                              onTap: () => Navigator.push(
                                 context,
-                                'Support tools coming soon.',
+                                MaterialPageRoute(
+                                  builder: (_) => const SupportScreen(),
+                                ),
+                              ),
+                            ),
+                            Divider(
+                              height: 1,
+                              color: AppColors.pitx_blue.withOpacity(0.10),
+                            ),
+                            CustomListItem(
+                              icon: Icons.report_problem_rounded,
+                              title: 'Report a Problem',
+                              subtitle:
+                                  'Help us improve by reporting issues or feedback',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ReportScreen(),
+                                ),
                               ),
                             ),
                           ],
@@ -125,61 +160,6 @@ class MoreScreen extends StatelessWidget {
               );
             },
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  final String displayName;
-  final String email;
-  final String initials;
-
-  const _ProfileHeader({
-    required this.displayName,
-    required this.email,
-    required this.initials,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            color: AppColors.pitx_blue.withOpacity(0.10),
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.pitx_blue.withOpacity(0.18)),
-          ),
-          child: Center(
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w700,
-                color: AppColors.pitx_blue,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          displayName,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          email,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
       ],
     );

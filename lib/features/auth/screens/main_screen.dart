@@ -26,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isHomeSelected = _currentIndex == 0;
     final bool isRouteSelected = _currentIndex == 1;
 
     return Scaffold(
@@ -39,6 +40,10 @@ class _MainScreenState extends State<MainScreen> {
                 });
               },
             )
+          : !isHomeSelected
+          ? AppTopBar(
+            title: _titles[_currentIndex],
+          )
           : null,
       body: _screens[_currentIndex],
       bottomNavigationBar: isRouteSelected
