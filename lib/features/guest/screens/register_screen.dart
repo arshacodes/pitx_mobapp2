@@ -38,6 +38,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return usernameRegex.hasMatch(username) && username.length <= 50;
   }
 
+  bool _isValidPhone(String phone) {
+    final phoneRegex = RegExp(r'^\+63[0-9]{10}$');
+    return phoneRegex.hasMatch(phone);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -75,8 +80,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _errorMessage = 'Please enter your phone number');
       return;
     }
-    if (_phoneController.text.length < 7 || _phoneController.text.length > 25) {
-      setState(() => _errorMessage = 'Phone number must be 7-25 characters');
+    if (!_isValidPhone(_phoneController.text)) {
+      setState(() => _errorMessage = 'Please enter a valid mobile number');
       return;
     }
     if (_usernameController.text.isEmpty) {
@@ -84,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
     if (!_isValidUsername(_usernameController.text)) {
-      setState(() => _errorMessage = 'Username can only contain letters, numbers, dashes, and underscores (max 50 chars)');
+      setState(() => _errorMessage = 'Username can only contain letters, numbers, dashes, and underscores (max 20 chars)');
       return;
     }
     if (_passwordController.text.isEmpty) {
@@ -117,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Success - navigate to main screen
       Get.offNamedUntil('/main', (route) => false);
     } catch (e) {
-      setState(() => _errorMessage = 'Registration failed: ${e.toString()}');
+      setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
@@ -156,23 +161,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // if (_errorMessage.isNotEmpty)
-              //   Container(
-              //     padding: const EdgeInsets.all(12),
-              //     decoration: BoxDecoration(
-              //       color: Colors.red.withOpacity(0.1),
-              //       borderRadius: BorderRadius.circular(8),
-              //       border: Border.all(color: Colors.red.withOpacity(0.5)),
-              //     ),
-              //     child: Text(
-              //       _errorMessage,
-              //       style: const TextStyle(
-              //         color: Colors.red,
-              //         fontSize: 14,
-              //       ),
-              //     ),
-              //   ),
-              // if (_errorMessage.isNotEmpty) const SizedBox(height: 16),
               CustomTextFormField(
                 labelText: 'Full name',
                 controller: _nameController,
@@ -185,20 +173,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 12),
               IntlPhoneField(
-                decoration: const InputDecoration(
-                  labelText: 'Phone number',
-                  border: OutlineInputBorder(),
-                ),
                 initialCountryCode: 'PH',
                 onChanged: (phone) {
                   _phoneController.text = phone.completeNumber;
                 },
-                validator: (phone) {
-                  if (phone == null || phone.number.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                },
+                decoration: InputDecoration(
+                  labelText: 'Phone number',
+                  labelStyle: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: AppColors.pitx_blue.withOpacity(0.10),
+                      width: 0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide(
+                      color: AppColors.pitx_blue.withOpacity(0.10),
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 1),
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               CustomTextFormField(
@@ -248,13 +257,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const Spacer(),
               Obx(() => _authController.isLoading.value
                   ? SizedBox(
-                      height: 50,
+                      height: 58,
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.lightTheme.primaryColor,
                           disabledBackgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
                         child: const SizedBox(
                           width: 24,
@@ -263,6 +275,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             strokeWidth: 2,
                           ),
+                          // padding: EdgeInsets.all(16),
                         ),
                       ),
                     )

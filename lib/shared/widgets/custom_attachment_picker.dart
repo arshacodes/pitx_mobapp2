@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 
 class CustomAttachmentPicker extends StatefulWidget {
-  final List<PlatformFile>? initialAttachments;
+  final List<XFile>? initialAttachments;
   final bool allowMultiple;
   final String buttonLabel;
-  final void Function(List<PlatformFile>)? onAttachmentsChanged;
+  final void Function(List<XFile>)? onAttachmentsChanged;
 
   const CustomAttachmentPicker({
     super.key,
@@ -21,7 +21,9 @@ class CustomAttachmentPicker extends StatefulWidget {
 }
 
 class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
-  late List<PlatformFile> _attachments;
+  late List<XFile> _attachments;
+  final Map<String, int> _fileSizes = {};
+  final _picker = ImagePicker();
 
   @override
   void initState() {
@@ -30,18 +32,26 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
   }
 
   Future<void> _pickFiles() async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: widget.allowMultiple,
-      withReadStream: true,
-      withData: false,
-    );
+    List<XFile> picked = [];
 
-    if (result == null) return;
+    if (widget.allowMultiple) {
+      picked = await _picker.pickMultiImage();
+    } else {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      if (file != null) picked = [file];
+    }
+
+    if (picked.isEmpty) return;
+
+    final newFiles = picked
+        .where((file) => !_attachments.any((existing) => existing.path == file.path))
+        .toList();
+
+    for (final file in newFiles) {
+      _fileSizes[file.path] = await file.length();
+    }
 
     setState(() {
-      final newFiles = result.files
-          .where((file) => !_attachments.any((existing) => existing.path == file.path))
-          .toList();
       _attachments.addAll(newFiles);
     });
 
@@ -50,7 +60,8 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
 
   void _removeAttachment(int index) {
     setState(() {
-      _attachments.removeAt(index);
+      final removed = _attachments.removeAt(index);
+      _fileSizes.remove(removed.path);
     });
     widget.onAttachmentsChanged?.call(_attachments);
   }
@@ -90,6 +101,8 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
           ..._attachments.asMap().entries.map((entry) {
             final index = entry.key;
             final file = entry.value;
+            final sizeBytes = _fileSizes[file.path];
+            final sizeLabel = sizeBytes != null ? '${(sizeBytes / 1024).toStringAsFixed(1)} KB' : '';
 
             return Column(
               children: [
@@ -98,7 +111,7 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
                     contentPadding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
                     leading: const Icon(Icons.image_rounded, color: AppColors.pitx_blue, size: 24),
                     title: Text(file.name, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-                    subtitle: Text('${(file.size / 1024).toStringAsFixed(1)} KB', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    subtitle: Text(sizeLabel, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                     trailing: IconButton(
                       icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary),
                       onPressed: () => _removeAttachment(index),

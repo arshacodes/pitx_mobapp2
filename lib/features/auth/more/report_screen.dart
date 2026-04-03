@@ -6,7 +6,7 @@ import 'package:pitx_mobapp2/core/theme/app_theme.dart';
 import '../../../shared/widgets/custom_button.dart';
 // import '../../../shared/widgets/custom_location_list_item.dart';
 import '../../../shared/widgets/custom_list_item.dart';
-import '../../../shared/widgets/custom_secondary_button.dart';
+// import '../../../shared/widgets/custom_secondary_button.dart';
 // import '../../../shared/widgets/custom_text_form_field.dart';
 
 import 'package:pitx_mobapp2/shared/widgets/app_top_bar.dart';
@@ -19,35 +19,12 @@ class ReportScreen extends StatelessWidget {
   const ReportScreen({super.key});
   
   static const List<ReportItemsPreview> _reportItems = [
-    ReportItemsPreview(Icons.directions_bus_rounded, 'Facilities', 'Terminal cleanliness and safety concerns'),
-    ReportItemsPreview(Icons.badge_rounded, 'Terminal Operations', 'Issues with routes or staff behavior'),
-    ReportItemsPreview(Icons.bug_report_rounded, 'Commuter App', 'System bugs, feedback, and suggestions'),
-    ReportItemsPreview(Icons.build_rounded, 'Other', 'Any other issues or feedback related to PITX'),
+    ReportItemsPreview(Icons.directions_bus_rounded, 'Facilities', 'Terminal cleanliness and safety concerns', 'facilities'),
+    ReportItemsPreview(Icons.badge_rounded, 'Terminal Operations', 'Issues with routes or staff behavior', 'terminal_operations'),
+    ReportItemsPreview(Icons.bug_report_rounded, 'Commuter App', 'System bugs, feedback, and suggestions', 'commuter_app'),
+    ReportItemsPreview(Icons.build_rounded, 'Other', 'Any other issues or feedback related to PITX', 'other'),
   ];
 
-  static final List<ReportHistoryItem> _sampleReportHistory = [
-    ReportHistoryItem(
-      category: 'Facilities',
-      subject: 'Unclean washroom',
-      description: 'Toilet floor is wet and smells bad.',
-      status: 'Resolved',
-      date: DateTime(2026, 3, 27),
-    ),
-    ReportHistoryItem(
-      category: 'Terminal Operations',
-      subject: 'Bus delay',
-      description: 'Bus 101 arrived 30 minutes late.',
-      status: 'Pending',
-      date: DateTime(2026, 3, 28),
-    ),
-    ReportHistoryItem(
-      category: 'Commuter App',
-      subject: 'Login error',
-      description: 'Unable to login using my account credentials.',
-      status: 'In Review',
-      date: DateTime(2026, 3, 29),
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +50,7 @@ class ReportScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ReportHistoryScreen(reports: _sampleReportHistory),
+                    builder: (context) => const ReportHistoryScreen(),
                   ),
                 );
               },
