@@ -17,12 +17,22 @@ class CrmService {
         'Authorization': 'Bearer ${_auth.token.value}',
       };
 
+  void _checkUnauthorized(http.Response response) {
+    if (response.statusCode == 401) {
+      _auth.logout();
+      Get.offAllNamed('/');
+      throw Exception('Session expired. Please log in again.');
+    }
+  }
+
   /// GET /crm/threads
   Future<List<CrmThread>> getThreads() async {
     final response = await http.get(
       Uri.parse('$url/crm/threads'),
       headers: _headers,
     );
+
+    _checkUnauthorized(response);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -52,6 +62,8 @@ class CrmService {
       }),
     );
 
+    _checkUnauthorized(response);
+
     if (response.statusCode == 201) {
       final responseBody = jsonDecode(response.body);
       return CrmThread.fromJson(responseBody['data'] as Map<String, dynamic>);
@@ -76,6 +88,8 @@ class CrmService {
       headers: _headers,
     );
 
+    _checkUnauthorized(response);
+
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final data = body['data'] as List<dynamic>;
@@ -98,6 +112,8 @@ class CrmService {
       headers: _headers,
       body: jsonEncode({'body': body}),
     );
+
+    _checkUnauthorized(response);
 
     if (response.statusCode == 201) {
       final responseBody = jsonDecode(response.body);
@@ -123,6 +139,8 @@ class CrmService {
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
+
+    _checkUnauthorized(response);
 
     if (response.statusCode == 201) {
       final responseBody = jsonDecode(response.body);

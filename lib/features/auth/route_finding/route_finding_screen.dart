@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:pitx_mobapp2/core/models/route_favorite.dart';
+import 'package:pitx_mobapp2/core/services/analytics_service.dart';
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 import 'package:pitx_mobapp2/core/theme/app_theme.dart';
 import 'package:pitx_mobapp2/features/auth/route_finding/route_finding_map_screen.dart';
@@ -21,8 +23,12 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
   final _destinationController = TextEditingController();
   final _originFocusNode = FocusNode();
   final _destinationFocusNode = FocusNode();
+  final _analyticsService = AnalyticsService();
 
   String? _message;
+  bool _hasValidSearch = false; // true when last search had non-empty origin+destination
+  List<RouteFavorite> _favorites = [];
+  bool _isFavorited = false; // whether current origin+dest is already a favorite
 
   static const List<_RouteLocationPreview> _popularLocations = [
     _RouteLocationPreview('PITX', 'Paranaque Integrated Terminal Exchange'),
@@ -31,11 +37,20 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
     _RouteLocationPreview('Baclaran', 'EDSA Extension, Pasay'),
   ];
 
-  static const List<_RecentRoutePreview> _recentRoutes = [
-    _RecentRoutePreview('PITX', 'SM Mall of Asia'),
-    _RecentRoutePreview('Baclaran', 'PITX'),
-    _RecentRoutePreview('Ayala Malls Manila Bay', 'PITX'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final favorites = await _analyticsService.getFavorites();
+      if (mounted) setState(() => _favorites = favorites);
+    } catch (e) {
+      debugPrint('Failed to load favorites: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -50,11 +65,56 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
     final origin = _originController.text.trim();
     final destination = _destinationController.text.trim();
 
+    if (origin.isNotEmpty && destination.isNotEmpty) {
+      // Fire-and-forget — does not block or show errors to the user
+      _analyticsService.logSearch(origin: origin, destination: destination);
+    }
+
     setState(() {
-      _message = origin.isEmpty || destination.isEmpty
-          ? 'Please enter both an origin and a destination.'
-          : 'Route preview for $origin to $destination will be available soon.';
+      _hasValidSearch = origin.isNotEmpty && destination.isNotEmpty;
+      _message = _hasValidSearch
+          ? 'Route preview for $origin to $destination will be available soon.'
+          : 'Please enter both an origin and a destination.';
+      // Check if this pair is already in the loaded favorites
+      _isFavorited = _favorites.any(
+        (f) => f.origin == origin && f.destination == destination,
+      );
     });
+  }
+
+  Future<void> _toggleFavorite() async {
+    final origin = _originController.text.trim();
+    final destination = _destinationController.text.trim();
+
+    try {
+      if (_isFavorited) {
+        // Remove: find the matching favorite and delete it
+        final existing = _favorites.firstWhere(
+          (f) => f.origin == origin && f.destination == destination,
+        );
+        await _analyticsService.removeFavorite(existing.id);
+        if (mounted) {
+          setState(() {
+            _favorites.removeWhere((f) => f.id == existing.id);
+            _isFavorited = false;
+          });
+        }
+      } else {
+        // Add: save to backend then update local state
+        final saved = await _analyticsService.addFavorite(
+          origin: origin,
+          destination: destination,
+        );
+        if (mounted) {
+          setState(() {
+            _favorites.insert(0, saved);
+            _isFavorited = true;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('toggleFavorite error: $e');
+    }
   }
 
   void _applyPopularLocation(_RouteLocationPreview location) {
@@ -69,14 +129,6 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
       } else {
         _destinationController.text = location.name;
       }
-      _message = null;
-    });
-  }
-
-  void _applyHistoryItem(_RecentRoutePreview item) {
-    setState(() {
-      _originController.text = item.origin;
-      _destinationController.text = item.destination;
       _message = null;
     });
   }
@@ -96,20 +148,41 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
       context: context,
       showDragHandle: true,
       builder: (context) {
+        if (_favorites.isEmpty) {
+          return const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: Text(
+                  'No saved routes yet.\nSearch for a route and tap the star to save it.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }
+
         return SafeArea(
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: _recentRoutes.length,
+            itemCount: _favorites.length,
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, index) {
-              final item = _recentRoutes[index];
+              final item = _favorites[index];
 
               return ListTile(
                 title: Text('${item.origin} to ${item.destination}'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
                   Navigator.pop(context);
-                  _applyHistoryItem(item);
+                  // Reuse existing apply logic by setting controllers directly
+                  setState(() {
+                    _originController.text = item.origin;
+                    _destinationController.text = item.destination;
+                    _message = null;
+                    _hasValidSearch = false;
+                    _isFavorited = false;
+                  });
                 },
               );
             },
@@ -270,14 +343,34 @@ class _RouteFindingScreenState extends State<RouteFindingScreen> {
               const SizedBox(height: 16),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.only(
+                  left: 12, top: 8, bottom: 8, right: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.pitx_blue.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Text(
-                  _message!,
-                  style: const TextStyle(color: AppColors.textPrimary),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _message!,
+                        style: const TextStyle(color: AppColors.textPrimary),
+                      ),
+                    ),
+                    // Star icon only appears for valid (non-error) searches
+                    if (_hasValidSearch)
+                      IconButton(
+                        icon: Icon(
+                          _isFavorited ? Icons.star_rounded : Icons.star_border_rounded,
+                          color: _isFavorited
+                              ? AppColors.pitx_blue
+                              : AppColors.textSecondary,
+                        ),
+                        tooltip: _isFavorited ? 'Remove from favorites' : 'Save to favorites',
+                        onPressed: _toggleFavorite,
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -328,9 +421,3 @@ class _RouteLocationPreview {
   const _RouteLocationPreview(this.name, this.address);
 }
 
-class _RecentRoutePreview {
-  final String origin;
-  final String destination;
-
-  const _RecentRoutePreview(this.origin, this.destination);
-}

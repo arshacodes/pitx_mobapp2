@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 import 'package:pitx_mobapp2/core/theme/app_theme.dart';
+import 'package:pitx_mobapp2/controllers/authentication.dart';
 
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/custom_text_form_field.dart';
@@ -14,18 +16,45 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  late final AuthenticationController _authController;
+  String _errorMessage = '';
 
   @override
-  // void dispose() {
-  //   _emailController.dispose();
-  //   _passwordController.dispose();
-  //   super.dispose();
-  // }
+  void initState() {
+    super.initState();
+    _authController = Get.find<AuthenticationController>();
+  }
 
-  void _submit() {
-    // Navigator.pushNamedAndRemoveUntil(context, '/main', (_) => false);
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _submit() async {
+    setState(() => _errorMessage = '');
+
+    if (_usernameController.text.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your username');
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your password');
+      return;
+    }
+
+    try {
+      await _authController.login(
+        username: _usernameController.text,
+        password: _passwordController.text,
+      );
+      Get.offAllNamed('/main');
+    } catch (e) {
+      setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
+    }
   }
 
   void _showPasswordHelp() {
@@ -74,9 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   CustomTextFormField(
-                    labelText: 'Email',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    labelText: 'Username',
+                    controller: _usernameController,
+                    keyboardType: TextInputType.text,
                   ),
                   const SizedBox(height: 12),
                   CustomTextFormField(
@@ -96,15 +125,60 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text('Forgot password?'),
                     ),
                   ),
+                  if (_errorMessage.isNotEmpty) const SizedBox(height: 4),
+                  if (_errorMessage.isNotEmpty)
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.red.withOpacity(0.10)),
+                        ),
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               const Spacer(),
-              CustomButton(
-                label: 'Login',
-                onPressed: _submit,
-                backgroundColor: AppTheme.lightTheme.primaryColor,
-                textColor: Colors.white,
-              ),
+              Obx(() => _authController.isLoading.value
+                  ? SizedBox(
+                      height: 58,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.lightTheme.primaryColor,
+                          disabledBackgroundColor:
+                              AppTheme.lightTheme.primaryColor.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    )
+                  : CustomButton(
+                      label: 'Login',
+                      onPressed: _submit,
+                      backgroundColor: AppTheme.lightTheme.primaryColor,
+                      textColor: Colors.white,
+                    )),
               const SizedBox(height: 24),
             ],
           ),

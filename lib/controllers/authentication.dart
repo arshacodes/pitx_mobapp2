@@ -108,6 +108,61 @@ class AuthenticationController extends GetxController {
     }
   }
 
+  Future<void> login({
+    required String username,
+    required String password,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final response = await http.post(
+        Uri.parse('$url/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        try {
+          final data = responseData['data'] as Map<String, dynamic>;
+          final tokenFromResponse = data['token'] as String;
+          final userData = data['user'] as Map<String, dynamic>;
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', tokenFromResponse);
+          await prefs.setString('auth_user', jsonEncode(userData));
+
+          token.value = tokenFromResponse;
+          user.value = User.fromJson(userData);
+
+          debugPrint('Login successful');
+        } catch (e) {
+          debugPrint('Error parsing login response: $e');
+          throw Exception('Failed to process login response');
+        }
+      } else {
+        final errorResponse = jsonDecode(response.body);
+        String errorMessage = 'Login failed';
+
+        if (errorResponse['errors'] != null) {
+          final errors = errorResponse['errors'] as Map<String, dynamic>;
+          final firstError = errors.values.first as List;
+          errorMessage = firstError.first.toString();
+        } else if (errorResponse['message'] != null) {
+          errorMessage = errorResponse['message'];
+        }
+
+        debugPrint('Login failed: $errorMessage');
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      debugPrint('Error during login: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();

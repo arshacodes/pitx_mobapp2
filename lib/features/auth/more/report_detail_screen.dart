@@ -9,6 +9,7 @@ import 'package:pitx_mobapp2/shared/widgets/custom_text_form_field.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_expandable_text_form_field.dart';
 import 'package:pitx_mobapp2/shared/widgets/custom_attachment_picker.dart';
 import 'models/report_item_preview.dart';
+import 'report_history_screen.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final ReportItemsPreview item;
@@ -74,10 +75,11 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report submitted successfully!')),
+        // Navigate to history so the user can see their submitted report
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ReportHistoryScreen()),
         );
-        Navigator.pop(context);
       }
     } catch (e) {
       setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
@@ -158,6 +160,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             const SizedBox(height: 16),
             CustomAttachmentPicker(
               allowMultiple: true,
+              maxCount: 5,
               onAttachmentsChanged: (attachments) {
                 _attachments = attachments;
               },

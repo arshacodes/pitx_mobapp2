@@ -5,6 +5,7 @@ import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 class CustomAttachmentPicker extends StatefulWidget {
   final List<XFile>? initialAttachments;
   final bool allowMultiple;
+  final int maxCount; // max number of attachments allowed; 0 = unlimited
   final String buttonLabel;
   final void Function(List<XFile>)? onAttachmentsChanged;
 
@@ -12,6 +13,7 @@ class CustomAttachmentPicker extends StatefulWidget {
     super.key,
     this.initialAttachments,
     this.allowMultiple = true,
+    this.maxCount = 0,
     this.buttonLabel = 'Add Images (optional)',
     this.onAttachmentsChanged,
   });
@@ -43,9 +45,16 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
 
     if (picked.isEmpty) return;
 
-    final newFiles = picked
+    var newFiles = picked
         .where((file) => !_attachments.any((existing) => existing.path == file.path))
         .toList();
+
+    // Trim to respect maxCount if set
+    if (widget.maxCount > 0) {
+      final available = widget.maxCount - _attachments.length;
+      if (available <= 0) return;
+      newFiles = newFiles.take(available).toList();
+    }
 
     for (final file in newFiles) {
       _fileSizes[file.path] = await file.length();
@@ -93,7 +102,9 @@ class _CustomAttachmentPickerState extends State<CustomAttachmentPicker> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Max size: 10MB',
+          widget.maxCount > 0
+              ? 'Max ${widget.maxCount} images · 10MB each'
+              : 'Max size: 10MB',
           style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         if (_attachments.isNotEmpty) ...[

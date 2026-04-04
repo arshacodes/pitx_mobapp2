@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import 'package:pitx_mobapp2/controllers/authentication.dart';
 import 'package:pitx_mobapp2/features/auth/more/profile_screen.dart';
 import 'package:pitx_mobapp2/features/auth/more/support_screen.dart';
 import 'package:pitx_mobapp2/features/auth/more/report_screen.dart';
@@ -16,7 +18,9 @@ class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
   void _logout(BuildContext context) {
-    Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+    Get.find<AuthenticationController>().logout().then((_) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+    });
   }
 
   void _showPlaceholder(BuildContext context, String message) {

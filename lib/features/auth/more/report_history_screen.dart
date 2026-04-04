@@ -3,6 +3,7 @@ import 'package:pitx_mobapp2/core/theme/app_colors.dart';
 import 'package:pitx_mobapp2/core/models/crm_thread.dart';
 import 'package:pitx_mobapp2/core/services/crm_service.dart';
 import 'package:pitx_mobapp2/shared/widgets/app_top_bar.dart';
+import 'report_thread_screen.dart';
 
 class ReportHistoryScreen extends StatefulWidget {
   const ReportHistoryScreen({super.key});
@@ -32,20 +33,6 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
       case 'other':
       default:
         return Icons.build_rounded;
-    }
-  }
-
-  String _labelForCategory(String category) {
-    switch (category) {
-      case 'facilities':
-        return 'Facilities';
-      case 'terminal_operations':
-        return 'Terminal Operations';
-      case 'commuter_app':
-        return 'Commuter App';
-      case 'other':
-      default:
-        return 'Other';
     }
   }
 
@@ -92,7 +79,18 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final thread = threads[index];
-                final status = thread.isClosed ? 'Resolved' : 'Open';
+
+                // Map status to display label and color
+                final statusLabel = switch (thread.status) {
+                  'resolved' => 'Resolved',
+                  'ongoing'  => 'Ongoing',
+                  _          => 'Open',
+                };
+                final statusColor = switch (thread.status) {
+                  'resolved' => Colors.green,
+                  'ongoing'  => AppColors.pitx_blue,
+                  _          => Colors.orange,
+                };
 
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -108,26 +106,15 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                     maxLines: 1,
                   ),
                   trailing: Text(
-                    status,
-                    style: TextStyle(color: thread.isClosed ? Colors.green : Colors.orange),
+                    statusLabel,
+                    style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
                   ),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(_labelForCategory(thread.category)),
-                        content: Text(
-                          'Subject: ${thread.subject}\n\nStatus: $status\n\nLast activity: ${thread.lastMessageAtHuman ?? thread.createdAtHuman ?? '—'}',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReportThreadScreen(thread: thread),
+                    ),
+                  ),
                 );
               },
             );

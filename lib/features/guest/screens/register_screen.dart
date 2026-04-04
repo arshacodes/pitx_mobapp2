@@ -35,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isValidUsername(String username) {
     final usernameRegex = RegExp(r'^[a-zA-Z0-9_-]+$');
-    return usernameRegex.hasMatch(username) && username.length <= 50;
+    return usernameRegex.hasMatch(username) && username.length <= 20;
   }
 
   bool _isValidPhone(String phone) {
