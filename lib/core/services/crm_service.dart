@@ -28,7 +28,7 @@ class CrmService {
   /// GET /crm/threads
   Future<List<CrmThread>> getThreads() async {
     final response = await http.get(
-      Uri.parse('$url/crm/threads'),
+      Uri.parse('${AppConfig.baseUrl}/crm/threads'),
       headers: _headers,
     );
 
@@ -53,7 +53,7 @@ class CrmService {
     required String body,
   }) async {
     final response = await http.post(
-      Uri.parse('$url/crm/threads'),
+      Uri.parse('${AppConfig.baseUrl}/crm/threads'),
       headers: _headers,
       body: jsonEncode({
         'category': category,
@@ -84,7 +84,7 @@ class CrmService {
   /// GET /crm/threads/{thread}/messages
   Future<List<CrmMessage>> getMessages(int threadId) async {
     final response = await http.get(
-      Uri.parse('$url/crm/threads/$threadId/messages'),
+      Uri.parse('${AppConfig.baseUrl}/crm/threads/$threadId/messages'),
       headers: _headers,
     );
 
@@ -108,7 +108,7 @@ class CrmService {
     required String body,
   }) async {
     final response = await http.post(
-      Uri.parse('$url/crm/threads/$threadId/messages'),
+      Uri.parse('${AppConfig.baseUrl}/crm/threads/$threadId/messages'),
       headers: _headers,
       body: jsonEncode({'body': body}),
     );
@@ -131,7 +131,7 @@ class CrmService {
   }) async {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('$url/crm/threads/$threadId/messages/$messageId/attachments'),
+      Uri.parse('${AppConfig.baseUrl}/crm/threads/$threadId/messages/$messageId/attachments'),
     );
 
     request.headers['Authorization'] = 'Bearer ${_auth.token.value}';

@@ -85,7 +85,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Find routes easily with the\nPITX Commuter App.',
+                        'Find routes easily with the\nPITX Commuter App',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,

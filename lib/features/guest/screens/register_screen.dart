@@ -145,7 +145,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
+          // Dismiss keyboard when scrolling starts
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
@@ -236,25 +238,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               if (_errorMessage.isNotEmpty) const SizedBox(height: 16),
               if (_errorMessage.isNotEmpty)
-                SizedBox(
+                Container(
                   width: double.infinity,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.red.withOpacity(0.10)),
-                    ),
-                    child: Text(
-                      _errorMessage,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 14,
-                      ),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.red.withOpacity(0.10)),
+                  ),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
                     ),
                   ),
                 ),
-              const Spacer(),
+              const SizedBox(height: 24),
               Obx(() => _authController.isLoading.value
                   ? SizedBox(
                       height: 58,

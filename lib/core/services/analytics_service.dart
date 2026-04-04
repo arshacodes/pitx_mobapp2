@@ -30,7 +30,7 @@ class AnalyticsService {
   }) async {
     try {
       await http.post(
-        Uri.parse('$url/analytics/route-searches'),
+        Uri.parse('${AppConfig.baseUrl}/analytics/route-searches'),
         headers: _headers,
         body: jsonEncode({'origin': origin, 'destination': destination}),
       );
@@ -42,7 +42,7 @@ class AnalyticsService {
   // GET /analytics/route-favorites
   Future<List<RouteFavorite>> getFavorites() async {
     final response = await http.get(
-      Uri.parse('$url/analytics/route-favorites'),
+      Uri.parse('${AppConfig.baseUrl}/analytics/route-favorites'),
       headers: _headers,
     );
 
@@ -66,7 +66,7 @@ class AnalyticsService {
     required String destination,
   }) async {
     final response = await http.post(
-      Uri.parse('$url/analytics/route-favorites'),
+      Uri.parse('${AppConfig.baseUrl}/analytics/route-favorites'),
       headers: _headers,
       body: jsonEncode({'origin': origin, 'destination': destination}),
     );
@@ -84,7 +84,7 @@ class AnalyticsService {
   // DELETE /analytics/route-favorites/{id}
   Future<void> removeFavorite(int id) async {
     final response = await http.delete(
-      Uri.parse('$url/analytics/route-favorites/$id'),
+      Uri.parse('${AppConfig.baseUrl}/analytics/route-favorites/$id'),
       headers: _headers,
     );
 

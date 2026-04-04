@@ -84,70 +84,65 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 24),
           child: Column(
             children: [
               const SizedBox(height: 48),
-              Column(
-                children: [
-                  Image.asset('assets/images/pitx_logo.png', height: 60),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Commuter App',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  CustomTextFormField(
-                    labelText: 'Username',
-                    controller: _usernameController,
-                    keyboardType: TextInputType.text,
-                  ),
-                  const SizedBox(height: 12),
-                  CustomTextFormField(
-                    labelText: 'Password',
-                    controller: _passwordController,
-                    obscureText: true,
-                    suffixIcon: Icon(
-                      Icons.lock_outline_rounded,
-                      color: AppColors.pitx_blue.withOpacity(0.30),
-                    ),
-                  ),
-                  // const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _showPasswordHelp,
-                      child: const Text('Forgot password?'),
-                    ),
-                  ),
-                  if (_errorMessage.isNotEmpty) const SizedBox(height: 4),
-                  if (_errorMessage.isNotEmpty)
-                    SizedBox(
-                      width: double.infinity,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.red.withOpacity(0.10)),
-                        ),
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              Image.asset('assets/images/pitx_logo.png', height: 60),
+              const SizedBox(height: 12),
+              const Text(
+                'Commuter App',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(height: 32),
+              CustomTextFormField(
+                labelText: 'Username',
+                controller: _usernameController,
+                keyboardType: TextInputType.text,
+              ),
+              const SizedBox(height: 12),
+              CustomTextFormField(
+                labelText: 'Password',
+                controller: _passwordController,
+                obscureText: true,
+                suffixIcon: Icon(
+                  Icons.lock_outline_rounded,
+                  color: AppColors.pitx_blue.withOpacity(0.30),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _showPasswordHelp,
+                  child: const Text('Forgot password?'),
+                ),
+              ),
+              if (_errorMessage.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.red.withOpacity(0.10)),
+                  ),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 32),
               Obx(() => _authController.isLoading.value
                   ? SizedBox(
                       height: 58,

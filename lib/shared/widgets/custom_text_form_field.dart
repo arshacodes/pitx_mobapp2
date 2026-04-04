@@ -14,6 +14,7 @@ class CustomTextFormField extends StatefulWidget {
   final EdgeInsetsGeometry suffixIconPadding;
   final BoxConstraints? suffixIconConstraints;
   final String? placeholder;
+  final bool readOnly;
 
   const CustomTextFormField({
     super.key,
@@ -29,6 +30,7 @@ class CustomTextFormField extends StatefulWidget {
     this.suffixIconPadding = const EdgeInsets.only(right: 16),
     this.suffixIconConstraints,
     this.placeholder,
+    this.readOnly = false,
   });
 
   @override
@@ -72,6 +74,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       controller: widget.controller,
       obscureText: widget.obscureText,
       keyboardType: widget.keyboardType,
+      readOnly: widget.readOnly,
       // initialValue: widget.controller == null ? widget.placeholder : null,
       // onChanged: (value) {
       //   setState(() {
@@ -87,7 +90,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           fontSize: 16,
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: widget.readOnly ? AppColors.pitx_blue.withOpacity(0.04) : Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 18,

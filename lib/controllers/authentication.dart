@@ -53,10 +53,19 @@ class AuthenticationController extends GetxController {
         'password_confirmation': passwordConfirmation,
       });
 
-      var response = await http.post(
-        Uri.parse('$url/auth/register'),
+      // var response = await http.post(
+      //   Uri.parse('$url/auth/register'),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: data,
+      // );
+
+      final response = await http.post(
+        Uri.parse('${AppConfig.baseUrl}/auth/register'),
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: data,
       );
@@ -115,10 +124,36 @@ class AuthenticationController extends GetxController {
     try {
       isLoading.value = true;
 
+      // // final response = await http.post(
+      // //   Uri.parse('$url/auth/login'),
+      // //   headers: {'Content-Type': 'application/json'},
+      // //   body: jsonEncode({'username': username, 'password': password}),
+      // // );
+
+      // final response = await http.post(
+      //   Uri.parse('${AppConfig.baseUrl}/auth/login'),
+
+      // final fullUrl = '${url.replaceAll(RegExp(r'/$'), '')}/auth/login';
+
+      debugPrint('LOGIN URL: ${AppConfig.baseUrl}/auth/login');
+
+      final body = jsonEncode({
+        'username': username,
+        'password': password,
+      });
+
+      debugPrint('LOGIN PAYLOAD: $body');
+
       final response = await http.post(
-        Uri.parse('$url/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        Uri.parse('${AppConfig.baseUrl}/auth/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -160,6 +195,55 @@ class AuthenticationController extends GetxController {
       rethrow;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // PATCH /auth/me — updates name, username, phone_number (email is not editable)
+  Future<void> updateProfile({
+    String? name,
+    String? username,
+    String? phoneNumber,
+  }) async {
+    final body = <String, dynamic>{};
+    if (name != null) body['name'] = name;
+    if (username != null) body['username'] = username;
+    if (phoneNumber != null) body['phone_number'] = phoneNumber.isEmpty ? null : phoneNumber;
+
+    final response = await http.patch(
+      Uri.parse('${AppConfig.baseUrl}/auth/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token.value}',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401) {
+      await logout();
+      Get.offAllNamed('/');
+      throw Exception('Session expired. Please log in again.');
+    }
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      final userData = responseData['data'] as Map<String, dynamic>;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_user', jsonEncode(userData));
+      user.value = User.fromJson(userData);
+    } else {
+      final errorResponse = jsonDecode(response.body);
+      String errorMessage = 'Update failed';
+
+      if (errorResponse['errors'] != null) {
+        final errors = errorResponse['errors'] as Map<String, dynamic>;
+        final firstError = errors.values.first as List;
+        errorMessage = firstError.first.toString();
+      } else if (errorResponse['message'] != null) {
+        errorMessage = errorResponse['message'];
+      }
+
+      throw Exception(errorMessage);
     }
   }
 

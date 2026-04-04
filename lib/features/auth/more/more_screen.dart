@@ -23,6 +23,14 @@ class MoreScreen extends StatelessWidget {
     });
   }
 
+  // Derive two-character initials from a full name
+  String _initials(String name) {
+    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
   void _showPlaceholder(BuildContext context, String message) {
     ScaffoldMessenger.of(
       context,
@@ -74,11 +82,15 @@ class MoreScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         // const Spacer(),
-                        const ProfileHeader(
-                          displayName: 'Commuter Account',
-                          email: 'Manage your travel tools and preferences',
-                          initials: 'CA',
-                        ),
+                        // Show live user name/initials from controller
+                        Obx(() {
+                          final user = Get.find<AuthenticationController>().user.value;
+                          return ProfileHeader(
+                            displayName: user?.name ?? 'Commuter Account',
+                            email: 'Manage your travel tools and preferences',
+                            initials: user != null ? _initials(user.name) : 'CA',
+                          );
+                        }),
                         const SizedBox(height: 24),
                         Column(
                           mainAxisSize: MainAxisSize.min,
